@@ -5,7 +5,7 @@ local OTA = require("OTA")
 settings.define("ota.group", {
     description = "Ota group filter",
     default = "default",
-    type = string
+    type = "string"
 })
 
 settings.load()
@@ -15,8 +15,8 @@ local pressed = false
 function BIOS()
     while true do
         local _, character = os.pullEvent("char")
-        print(character)
         if character == 'f' then
+            pressed = true
             print("Enter group override (" .. settings.get("ota.group") .. "):")
             write("> ")
             local group = read()
