@@ -14,6 +14,13 @@ function OTA.launch(group, path)
     }, "ota_launch")
 end
 
+function OTA.group(group, ngroup)
+    rednet.broadcast({
+        group = group,
+        ngroup = ngroup
+    }, "ota_group")
+end
+
 function OTA.handle(parent, id, data, protocol, group)
     if protocol == "ota_run" then
         if data.file and data.group then
@@ -44,6 +51,16 @@ function OTA.handle(parent, id, data, protocol, group)
                 end
             else
                 printError("[OTA] Failed to launch " .. data.path)
+            end
+        else
+            printError("[OTA] Packet invalid")
+        end
+    elseif protocol == "ota_group" then
+        if data.group and data.ngroup then
+            if data.group == group then
+                settings.set("ota.group", data.ngroup)
+                settings.save()
+                print("[OTA] Group updated to " .. data.ngroup)
             end
         else
             printError("[OTA] Packet invalid")

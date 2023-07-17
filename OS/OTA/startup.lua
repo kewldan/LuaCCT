@@ -22,6 +22,7 @@ function BIOS()
             local group = read()
             settings.set("ota.group", group)
             settings.save()
+            return
         end
     end
 end
