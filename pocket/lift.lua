@@ -16,16 +16,16 @@ if #args >= 1 then
             end
         end
     elseif args[1] == "lock" then
-        if #args == 2 then
-            local data = {
-                ["lock"] = args[2] == "true"
-            }
-            rednet.broadcast(textutils.serializeJSON(data), "liftLock")
-            if args[2] == "true" then
-                print("Lift is locked")
-            else
-                print("Lift is unlocked")
-            end
-        end
+        local data = {
+            lock = true
+        }
+        rednet.broadcast(textutils.serializeJSON(data), "liftLock")
+        print("Lift is locked")
+    elseif args[1] == "unlock" then
+        local data = {
+            lock = false
+        }
+        rednet.broadcast(textutils.serializeJSON(data), "liftLock")
+        print("Lift is unlocked")
     end
 end

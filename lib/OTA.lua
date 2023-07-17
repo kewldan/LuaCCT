@@ -1,42 +1,52 @@
 local OTA = {}
 
-function OTA.run(file)
+function OTA.run(group, file)
     rednet.broadcast({
-        ["file"] = file
+        group = group,
+        file = file
     }, "ota_run")
 end
 
-function OTA.launch(path)
+function OTA.launch(group, path)
     rednet.broadcast({
-        ["path"] = path
+        group = group,
+        path = path
     }, "ota_launch")
 end
 
-function OTA.handle(parent, id, data, protocol)
+function OTA.handle(parent, id, data, protocol, group)
     if protocol == "ota_run" then
-        if data.file then
+        if data.file and data.group then
+            if data.group ~= group then
+                return true
+            end
+
             pcall(shell.run, data.file)
-            print("Run command [" .. data.file .. "]")
+            print("[OTA] Run command [" .. data.file .. "]")
         else
-            printError("Packet invalid")
+            printError("[OTA] Packet invalid")
         end
     elseif protocol == "ota_launch" then
-        if data.path then
+        if data.path and data.group then
+            if data.group ~= group then
+                return true
+            end
+
             local status, functions = pcall(require, data.path)
             if status then
-                print("Running program")
+                print("[OTA] Running program")
                 local status, value = pcall(parallel.waitForAny, parent, table.unpack(functions))
                 if status then
-                    print("Program finished")
+                    print("[OTA] Program finished")
                 else
                     print(value)
-                    print("OTA daemon still alive")
+                    print("[OTA] OTA daemon still alive")
                 end
             else
-                printError("Failed to launch " .. data.path)
+                printError("[OTA] Failed to launch " .. data.path)
             end
         else
-            printError("Packet invalid")
+            printError("[OTA] Packet invalid")
         end
     else
         return false
